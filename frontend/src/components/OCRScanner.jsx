@@ -8,6 +8,8 @@ const OCRScanner = () => {
   const [error, setError] = useState(null);
   const [stream, setStream] = useState(null);
   const [imageSource, setImageSource] = useState("camera");
+  const [brand, setBrand] = useState("");
+  const [count, setCount] = useState(1);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -77,11 +79,12 @@ const OCRScanner = () => {
 
       const formData = new FormData();
       formData.append("image", imageBlob, "image.jpg");
+      formData.append("brand", brand);
+      formData.append("count", count);
 
       const response = await fetch("http://localhost:5000/api/expiry/ocr-scan", {
         method: "POST",
         body: formData,
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -89,13 +92,14 @@ const OCRScanner = () => {
       }
 
       const data = await response.json();
+      console.log("OCR scan response:", data);
       setText(data.raw_text || "");
       setDetails({
         expiry_date: data.expiry_date,
       });
     } catch (error) {
       console.error("Error scanning text:", error);
-      setError(`Failed to scan text: ${error.message}`);
+      setError("Failed to scan text. Please try again.");
       setText("");
       setDetails(null);
     } finally {
@@ -114,21 +118,21 @@ const OCRScanner = () => {
     <div className="ocr-scanner">
       <h2>OCR Scanner</h2>
       <div className="image-source-selector">
-        <button
+        {/* <button
           onClick={() => handleImageSourceChange("camera")}
           className={imageSource === "camera" ? "active" : ""}
         >
           Use Camera
-        </button>
+        </button> */}
         <button
           onClick={() => handleImageSourceChange("file")}
           className={imageSource === "file" ? "active" : ""}
-        >
+          style={{ backgroundColor: "#4CAF50" }}>
           Upload Image
         </button>
       </div>
       {imageSource === "camera" ? (
-        <div className="video-container">
+        <div className="video-container" style={{ display: "none" }}>
           <video
             ref={videoRef}
             autoPlay
@@ -147,21 +151,36 @@ const OCRScanner = () => {
           />
         </div>
       )}
+      <div className="input-container">
+        <input
+          type="text"
+          value={brand}
+          onChange={(e) => setBrand(e.target.value)}
+          placeholder="Enter brand name"
+        />
+        <input
+          type="number"
+          value={count}
+          onChange={(e) => setCount(parseInt(e.target.value))}
+          placeholder="Enter count"
+          min="1"
+        />
+      </div>
       {error && <p className="error">{error}</p>}
       <button
         onClick={handleOCRScan}
-        disabled={loading || (imageSource === "camera" && !stream)}
+        disabled={loading || (imageSource === "camera" && !stream) || !brand}
       >
         {loading ? "Scanning..." : "Scan for Text"}
       </button>
       {text && (
-        <div>
+        <div className="result">
           <h3>Raw Text:</h3>
           <p>{text}</p>
         </div>
       )}
       {details && details.expiry_date && (
-        <div>
+        <div className="result">
           <h3>Extracted Details:</h3>
           <p><strong>EXPIRY DATE:</strong> {details.expiry_date}</p>
         </div>

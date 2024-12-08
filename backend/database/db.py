@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, date
 
 def get_db_connection():
     conn = sqlite3.connect('gridstack.db')
@@ -29,8 +29,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp TEXT NOT NULL,
         produce TEXT NOT NULL,
-        freshness INTEGER NOT NULL,
-        expected_life_span INTEGER NOT NULL
+        result INTEGER NOT NULL    
     )
     ''')
     
@@ -42,8 +41,15 @@ def add_packaged_product(brand, expiry_date, count):
     cur = conn.cursor()
     
     timestamp = datetime.now().isoformat()
-    expired = "Yes" if datetime.strptime(expiry_date, "%Y-%m-%d") < datetime.now() else "NA"
-    expected_life_span = (datetime.strptime(expiry_date, "%Y-%m-%d") - datetime.now()).days if expired == "NA" else None
+    expiry_date_obj = datetime.strptime(expiry_date, "%Y-%m-%d").date()
+    today = date.today()
+    
+    if expiry_date_obj < today:
+        expired = "Yes"
+        expected_life_span = 0
+    else:
+        expired = "No"
+        expected_life_span = (expiry_date_obj - today).days
     
     cur.execute('''
     INSERT INTO packaged_products (timestamp, brand, expiry_date, count, expired, expected_life_span)
@@ -53,16 +59,16 @@ def add_packaged_product(brand, expiry_date, count):
     conn.commit()
     conn.close()
 
-def add_fresh_produce(produce, freshness, expected_life_span):
+def add_fresh_produce(produce, result):
     conn = get_db_connection()
     cur = conn.cursor()
     
     timestamp = datetime.now().isoformat()
     
     cur.execute('''
-    INSERT INTO fresh_produce (timestamp, produce, freshness, expected_life_span)
-    VALUES (?, ?, ?, ?)
-    ''', (timestamp, produce, freshness, expected_life_span))
+    INSERT INTO fresh_produce (timestamp, produce, result)
+    VALUES (?, ?, ?)
+    ''', (timestamp, produce, result))
     
     conn.commit()
     conn.close()
@@ -86,3 +92,4 @@ def get_all_fresh_produce():
     
     conn.close()
     return [dict(item) for item in produce]
+

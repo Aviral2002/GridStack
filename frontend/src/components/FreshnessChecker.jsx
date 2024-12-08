@@ -3,10 +3,13 @@ import "./FreshnessChecker.css";
 
 const FreshnessChecker = () => {
   const [result, setResult] = useState("");
+  const [freshness, setFreshness] = useState(null);
+  const [expectedLifeSpan, setExpectedLifeSpan] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [stream, setStream] = useState(null);
   const [imageSource, setImageSource] = useState("camera");
+  const [produce, setProduce] = useState("");
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -57,6 +60,9 @@ const FreshnessChecker = () => {
   const handleCheckFreshness = async () => {
     setLoading(true);
     setError(null);
+    setResult("");
+    setFreshness(null);
+    setExpectedLifeSpan(null);
 
     try {
       let imageBlob;
@@ -76,6 +82,7 @@ const FreshnessChecker = () => {
 
       const formData = new FormData();
       formData.append("image", imageBlob, "image.jpg");
+      formData.append("produce", produce);
 
       const response = await fetch("http://localhost:5000/api/freshness/freshness-check", {
         method: "POST",
@@ -88,7 +95,9 @@ const FreshnessChecker = () => {
 
       const data = await response.json();
       console.log("Freshness check response:", data);
-      setResult(data.result || "Unknown");
+      setResult(data.result);
+      setFreshness(data.freshness);
+      setExpectedLifeSpan(data.expected_life_span);
     } catch (error) {
       console.error("Error checking freshness:", error);
       setError(`Failed to check freshness: ${error.message}`);
@@ -107,21 +116,21 @@ const FreshnessChecker = () => {
     <div className="freshness-checker">
       <h2>Freshness Checker</h2>
       <div className="image-source-selector">
-        <button
+        {/* <button
           onClick={() => handleImageSourceChange("camera")}
           className={imageSource === "camera" ? "active" : ""}
         >
           Use Camera
-        </button>
+        </button> */}
         <button
           onClick={() => handleImageSourceChange("file")}
           className={imageSource === "file" ? "active" : ""}
-        >
+        style={{ backgroundColor: "#4CAF50" }}>
           Upload Image
         </button>
       </div>
       {imageSource === "camera" ? (
-        <div className="video-container">
+        <div className="video-container" style={{ display: "none" }}>
           <video
             ref={videoRef}
             autoPlay
@@ -140,14 +149,26 @@ const FreshnessChecker = () => {
           />
         </div>
       )}
+      <div className="input-container">
+        <input
+          type="text"
+          value={produce}
+          onChange={(e) => setProduce(e.target.value)}
+          placeholder="Enter produce name"
+        />
+      </div>
       {error && <p className="error">{error}</p>}
-      {result && <p className="result">Result: {result}</p>}
       <button
         onClick={handleCheckFreshness}
-        disabled={loading || (imageSource === "camera" && !stream)}
+        disabled={loading || (imageSource === "camera" && !stream) || !produce}
       >
         {loading ? "Checking..." : "Check Freshness"}
       </button>
+      {result && (
+        <div className="result">
+          <p>Classification: {result}</p>
+        </div>
+      )}
     </div>
   );
 };

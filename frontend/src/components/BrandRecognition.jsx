@@ -113,26 +113,27 @@ const BrandRecognition = () => {
     <div className="brand-recognition">
       <h2>Brand Recognition</h2>
       <div className="image-source-selector">
-        <button
+        {/* <button
           onClick={() => handleImageSourceChange("camera")}
           className={imageSource === "camera" ? "active" : ""}
         >
           Use Camera
-        </button>
+        </button> */}
         <button
           onClick={() => handleImageSourceChange("file")}
           className={imageSource === "file" ? "active" : ""}
-        >
+          style={{ backgroundColor: "#4CAF50" }}>
           Upload Image
         </button>
       </div>
       {imageSource === "camera" ? (
-        <div className="video-container">
+        <div className="video-container" style={{ display: "none" }}>
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
+            display="none"
           />
           <canvas ref={canvasRef} style={{ display: "none" }} />
         </div>
