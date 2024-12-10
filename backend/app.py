@@ -1,19 +1,11 @@
 import os
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from database import init_db
 from routes import freshness_bp, expiry_bp, brand_bp, data_display_bp
-import logging
+from database import init_db
 
 app = Flask(__name__)
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app)
 
 # Initialize the database
 init_db()
@@ -25,6 +17,6 @@ app.register_blueprint(brand_bp, url_prefix='/api/brand')
 app.register_blueprint(data_display_bp, url_prefix='/api/data')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
-
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
 

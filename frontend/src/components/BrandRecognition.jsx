@@ -91,7 +91,7 @@ const BrandRecognition = () => {
       const formData = new FormData();
       formData.append("image", imageBlob, "image.jpg");
 
-      const response = await fetch("http://192.168.29.157:5000/api/brand/brand-recognition", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/brand/brand-recognition`, {
         method: "POST",
         body: formData,
       });

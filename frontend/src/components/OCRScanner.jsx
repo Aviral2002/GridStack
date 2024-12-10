@@ -95,7 +95,7 @@ const OCRScanner = () => {
       formData.append("brand", brand);
       formData.append("count", count);
 
-      const response = await fetch("http://192.168.29.157:5000/api/expiry/ocr-scan", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/expiry/ocr-scan`, {
         method: "POST",
         body: formData,
       });

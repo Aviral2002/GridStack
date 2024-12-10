@@ -1,8 +1,30 @@
-# React + Vite
+# GridStack
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+GridStack is a full-stack application for freshness detection, OCR scanning, and brand recognition of products.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Freshness Checker: Detect the freshness of produce using image analysis.
+- OCR Scanner: Extract text information from product images, including expiry dates.
+- Brand Recognition: Identify product brands from images.
+- Data Display: View and manage stored data for packaged products and fresh produce.
+
+## Technologies Used
+
+- Frontend: React, Vite, TailwindCSS
+- Backend: Flask
+- Database: SQLite
+- Machine Learning: TensorFlow, Tesseract OCR, Roboflow
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or later)
+- Python (v3.7 or later)
+- pip
+
+### Installation
+
+1. Clone the repository:
+

@@ -46,7 +46,7 @@ const DataDisplay = () => {
 
   const handleDeleteSelected = async (type) => {
     try {
-      const response = await fetch('http://192.168.29.157:5000/api/data/delete-rows', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/data/delete-rows`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: gridstack-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app  # Adjust based on your Flask app structure
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0  # Match your Python versionservices:
+  - type: web
+    name: gridstack-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app  # Adjust based on your Flask app structure
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.20  # Match your Python version

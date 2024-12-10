@@ -97,7 +97,7 @@ const FreshnessChecker = () => {
       formData.append("image", imageBlob, "image.jpg");
       formData.append("produce", produce);
 
-      const response = await fetch("http://192.168.29.157:5000/api/freshness/freshness-check", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/freshness/freshness-check`, {
         method: "POST",
         body: formData,
       });
