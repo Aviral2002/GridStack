@@ -15,9 +15,6 @@ bp = Blueprint("brand_recognition", __name__)
 ROBOFLOW_API_URL = os.getenv("VITE_ROBOFLOW_MODEL_ENDPOINT")
 ROBOFLOW_API_KEY = os.getenv("VITE_ROBOFLOW_API_KEY")
 
-print("ROBOFLOW_API_KEY:", ROBOFLOW_API_KEY)
-print("ROBOFLOW_API_URL:", ROBOFLOW_API_URL)
-
 
 if not ROBOFLOW_API_URL or not ROBOFLOW_API_KEY:
     raise ValueError("ROBOFLOW_API_URL and ROBOFLOW_API_KEY must be set in the environment")

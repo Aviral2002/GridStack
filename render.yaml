@@ -6,4 +6,4 @@ services:
     startCommand: gunicorn app:app  # Adjust based on your Flask app structure
     envVars:
       - key: PYTHON_VERSION
-        value: 3.10.0  # Match your Python versionservices:
+        value: 3.10.10  # Match your Python versionservices:
