@@ -13,8 +13,7 @@ app = Flask(__name__)
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Apply CORS with support for credentials
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173", "supports_credentials": True}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Initialize the database
 init_db()
@@ -26,5 +25,6 @@ app.register_blueprint(brand_bp, url_prefix='/api/brand')
 app.register_blueprint(data_display_bp, url_prefix='/api/data')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
+
 

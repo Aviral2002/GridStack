@@ -10,7 +10,7 @@ from database import add_fresh_produce
 bp = Blueprint("freshness", __name__)
 
 # Load the CNN model
-model = load_model("models/freshnessIndex.h5")
+model = load_model("models/imageclassifier.h5")
 
 @bp.route("/freshness-check", methods=['POST'])
 @cross_origin()

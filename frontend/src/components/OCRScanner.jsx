@@ -1,60 +1,73 @@
 import React, { useState, useRef, useEffect } from "react";
-import "./OCRScanner.css";
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const OCRScanner = () => {
   const [text, setText] = useState("");
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [stream, setStream] = useState(null);
-  const [imageSource, setImageSource] = useState("camera");
   const [brand, setBrand] = useState("");
   const [count, setCount] = useState(1);
+  const [imageSource, setImageSource] = useState("file");
+  const [cameraFacing, setCameraFacing] = useState("environment");
+  const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const [stream, setStream] = useState(null);
 
   useEffect(() => {
-    const setupCamera = async () => {
-      try {
-        const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setStream(cameraStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = cameraStream;
-        }
-      } catch (err) {
-        console.error("Error accessing camera:", err);
-        setError("Failed to access camera. Please ensure camera permissions are granted.");
-      }
-    };
-
     if (imageSource === "camera") {
-      setupCamera();
+      startCamera();
+    } else {
+      stopCamera();
     }
+  }, [imageSource, cameraFacing]);
 
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+  const startCamera = async () => {
+    try {
+      const constraints = {
+        video: { facingMode: cameraFacing }
+      };
+      const cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStream(cameraStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = cameraStream;
       }
-    };
-  }, [imageSource]);
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+      setError("Failed to access camera. Please ensure camera permissions are granted.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
+
+  const toggleCamera = () => {
+    setImageSource(prev => prev === "camera" ? "file" : "camera");
+  };
+
+  const switchCamera = () => {
+    setCameraFacing(prev => prev === "user" ? "environment" : "user");
+  };
 
   const captureImage = () => {
-    return new Promise((resolve, reject) => {
-      if (videoRef.current && canvasRef.current) {
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0);
+      return new Promise((resolve) => {
         canvas.toBlob(resolve, "image/jpeg");
-      } else {
-        reject(new Error("Video or canvas element not available"));
-      }
-    });
+      });
+    }
+    return null;
   };
 
   const handleOCRScan = async () => {
@@ -82,7 +95,7 @@ const OCRScanner = () => {
       formData.append("brand", brand);
       formData.append("count", count);
 
-      const response = await fetch("http://localhost:5000/api/expiry/ocr-scan", {
+      const response = await fetch("http://192.168.29.157:5000/api/expiry/ocr-scan", {
         method: "POST",
         body: formData,
       });
@@ -107,85 +120,72 @@ const OCRScanner = () => {
     }
   };
 
-  const handleImageSourceChange = (source) => {
-    setImageSource(source);
-    setError(null);
-    setText("");
-    setDetails(null);
-  };
-
   return (
-    <div className="ocr-scanner">
-      <h2>OCR Scanner</h2>
-      <div className="image-source-selector">
-        {/* <button
-          onClick={() => handleImageSourceChange("camera")}
-          className={imageSource === "camera" ? "active" : ""}
-        >
-          Use Camera
-        </button> */}
-        <button
-          onClick={() => handleImageSourceChange("file")}
-          className={imageSource === "file" ? "active" : ""}
-          style={{ backgroundColor: "#4CAF50" }}>
-          Upload Image
-        </button>
-      </div>
-      {imageSource === "camera" ? (
-        <div className="video-container" style={{ display: "none" }}>
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>OCR Scanner</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <Input
+            type="text"
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
+            placeholder="Enter brand name"
           />
-          <canvas ref={canvasRef} style={{ display: "none" }} />
-        </div>
-      ) : (
-        <div className="file-input-container">
-          <input
-            type="file"
-            ref={fileInputRef}
-            accept="image/*"
-            onChange={() => setError(null)}
+          <Input
+            type="number"
+            value={count}
+            onChange={(e) => setCount(parseInt(e.target.value))}
+            placeholder="Enter count"
+            min="1"
           />
+          {imageSource === "file" ? (
+            <Input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={() => setError(null)}
+            />
+          ) : (
+            <div className="aspect-video bg-muted">
+              <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+              <canvas ref={canvasRef} className="hidden" />
+            </div>
+          )}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={toggleCamera} variant="secondary" className="flex-1">
+              {imageSource === "camera" ? "Use File Upload" : "Use Camera"}
+            </Button>
+            {imageSource === "camera" && (
+              <Button onClick={switchCamera} variant="secondary" className="flex-1">
+                Switch Camera
+              </Button>
+            )}
+            <Button
+              onClick={handleOCRScan}
+              disabled={loading || !brand}
+              className="flex-1"
+            >
+              {loading ? "Scanning..." : "Scan for Text"}
+            </Button>
+          </div>
+          {error && <p className="text-destructive">{error}</p>}
+          {text && (
+            <div className="mt-4 space-y-2">
+              <h3 className="font-semibold">Raw Text:</h3>
+              <p className="whitespace-pre-wrap">{text}</p>
+            </div>
+          )}
+          {details && details.expiry_date && (
+            <div className="mt-4 space-y-2">
+              <h3 className="font-semibold">Extracted Details:</h3>
+              <p><strong>EXPIRY DATE:</strong> {details.expiry_date}</p>
+            </div>
+          )}
         </div>
-      )}
-      <div className="input-container">
-        <input
-          type="text"
-          value={brand}
-          onChange={(e) => setBrand(e.target.value)}
-          placeholder="Enter brand name"
-        />
-        <input
-          type="number"
-          value={count}
-          onChange={(e) => setCount(parseInt(e.target.value))}
-          placeholder="Enter count"
-          min="1"
-        />
-      </div>
-      {error && <p className="error">{error}</p>}
-      <button
-        onClick={handleOCRScan}
-        disabled={loading || (imageSource === "camera" && !stream) || !brand}
-      >
-        {loading ? "Scanning..." : "Scan for Text"}
-      </button>
-      {text && (
-        <div className="result">
-          <h3>Raw Text:</h3>
-          <p>{text}</p>
-        </div>
-      )}
-      {details && details.expiry_date && (
-        <div className="result">
-          <h3>Extracted Details:</h3>
-          <p><strong>EXPIRY DATE:</strong> {details.expiry_date}</p>
-        </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

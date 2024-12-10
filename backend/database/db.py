@@ -29,7 +29,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp TEXT NOT NULL,
         produce TEXT NOT NULL,
-        result INTEGER NOT NULL    
+        result INTEGER NOT NULL
     )
     ''')
     
@@ -92,4 +92,16 @@ def get_all_fresh_produce():
     
     conn.close()
     return [dict(item) for item in produce]
+
+def delete_rows(table, ids):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    placeholders = ','.join('?' for _ in ids)
+    query = f'DELETE FROM {table} WHERE id IN ({placeholders})'
+    
+    cur.execute(query, ids)
+    
+    conn.commit()
+    conn.close()
 

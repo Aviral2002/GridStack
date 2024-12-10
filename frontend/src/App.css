@@ -1,6 +1,35 @@
+:root {
+  --primary-blue: #1F74BA;
+  --primary-yellow: #F7E200;
+  --primary-orange: #F09120;
+  --primary-white: #FFFFFF;
+  --secondary-blue: #0C73EB;
+  --secondary-indigo: #1B1F65;
+  --secondary-orange: #FFB842;
+  --secondary-yellow: #FFD73B;
+}
+
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: var(--primary-white);
+  margin: 0;
+  padding: 0;
+}
+
 .App {
   text-align: center;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
+}
+
+.main-title {
+  color: var(--primary-blue);
+  font-size: 2.5em;
+  margin-bottom: 30px;
 }
 
 .component-container {
@@ -12,5 +41,20 @@
 
 .component-container > div {
   margin: 10px;
+  background-color: var(--primary-white);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .component-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .component-container > div {
+    width: 90%;
+    max-width: 350px;
+  }
 }
 

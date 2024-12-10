@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import "./FreshnessChecker.css";
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const FreshnessChecker = () => {
   const [result, setResult] = useState("");
@@ -7,54 +9,65 @@ const FreshnessChecker = () => {
   const [expectedLifeSpan, setExpectedLifeSpan] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [stream, setStream] = useState(null);
-  const [imageSource, setImageSource] = useState("camera");
   const [produce, setProduce] = useState("");
+  const [imageSource, setImageSource] = useState("file");
+  const [cameraFacing, setCameraFacing] = useState("environment");
+  const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const [stream, setStream] = useState(null);
 
   useEffect(() => {
-    const setupCamera = async () => {
-      try {
-        const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setStream(cameraStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = cameraStream;
-        }
-      } catch (err) {
-        console.error("Error accessing camera:", err);
-        setError("Failed to access camera. Please ensure camera permissions are granted.");
-      }
-    };
-
     if (imageSource === "camera") {
-      setupCamera();
+      startCamera();
+    } else {
+      stopCamera();
     }
+  }, [imageSource, cameraFacing]);
 
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+  const startCamera = async () => {
+    try {
+      const constraints = {
+        video: { facingMode: cameraFacing }
+      };
+      const cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStream(cameraStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = cameraStream;
       }
-    };
-  }, [imageSource]);
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+      setError("Failed to access camera. Please ensure camera permissions are granted.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
+
+  const toggleCamera = () => {
+    setImageSource(prev => prev === "camera" ? "file" : "camera");
+  };
+
+  const switchCamera = () => {
+    setCameraFacing(prev => prev === "user" ? "environment" : "user");
+  };
 
   const captureImage = () => {
-    return new Promise((resolve, reject) => {
-      if (videoRef.current && canvasRef.current) {
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0);
+      return new Promise((resolve) => {
         canvas.toBlob(resolve, "image/jpeg");
-      } else {
-        reject(new Error("Video or canvas element not available"));
-      }
-    });
+      });
+    }
+    return null;
   };
 
   const handleCheckFreshness = async () => {
@@ -84,7 +97,7 @@ const FreshnessChecker = () => {
       formData.append("image", imageBlob, "image.jpg");
       formData.append("produce", produce);
 
-      const response = await fetch("http://localhost:5000/api/freshness/freshness-check", {
+      const response = await fetch("http://192.168.29.157:5000/api/freshness/freshness-check", {
         method: "POST",
         body: formData,
       });
@@ -106,70 +119,58 @@ const FreshnessChecker = () => {
     }
   };
 
-  const handleImageSourceChange = (source) => {
-    setImageSource(source);
-    setError(null);
-    setResult("");
-  };
-
   return (
-    <div className="freshness-checker">
-      <h2>Freshness Checker</h2>
-      <div className="image-source-selector">
-        {/* <button
-          onClick={() => handleImageSourceChange("camera")}
-          className={imageSource === "camera" ? "active" : ""}
-        >
-          Use Camera
-        </button> */}
-        <button
-          onClick={() => handleImageSourceChange("file")}
-          className={imageSource === "file" ? "active" : ""}
-        style={{ backgroundColor: "#4CAF50" }}>
-          Upload Image
-        </button>
-      </div>
-      {imageSource === "camera" ? (
-        <div className="video-container" style={{ display: "none" }}>
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>Freshness Checker</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <Input
+            type="text"
+            value={produce}
+            onChange={(e) => setProduce(e.target.value)}
+            placeholder="Enter produce name"
           />
-          <canvas ref={canvasRef} style={{ display: "none" }} />
+          {imageSource === "file" ? (
+            <Input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={() => setError(null)}
+            />
+          ) : (
+            <div className="aspect-video bg-muted">
+              <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+              <canvas ref={canvasRef} className="hidden" />
+            </div>
+          )}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={toggleCamera} variant="secondary" className="flex-1">
+              {imageSource === "camera" ? "Use File Upload" : "Use Camera"}
+            </Button>
+            {imageSource === "camera" && (
+              <Button onClick={switchCamera} variant="secondary" className="flex-1">
+                Switch Camera
+              </Button>
+            )}
+            <Button
+              onClick={handleCheckFreshness}
+              disabled={loading || !produce}
+              className="flex-1"
+            >
+              {loading ? "Checking..." : "Check Freshness"}
+            </Button>
+          </div>
+          {error && <p className="text-destructive">{error}</p>}
+          {result && (
+            <div className="mt-4 space-y-2">
+              <p><strong>Classification:</strong> {result}</p>
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="file-input-container">
-          <input
-            type="file"
-            ref={fileInputRef}
-            accept="image/*"
-            onChange={() => setError(null)}
-          />
-        </div>
-      )}
-      <div className="input-container">
-        <input
-          type="text"
-          value={produce}
-          onChange={(e) => setProduce(e.target.value)}
-          placeholder="Enter produce name"
-        />
-      </div>
-      {error && <p className="error">{error}</p>}
-      <button
-        onClick={handleCheckFreshness}
-        disabled={loading || (imageSource === "camera" && !stream) || !produce}
-      >
-        {loading ? "Checking..." : "Check Freshness"}
-      </button>
-      {result && (
-        <div className="result">
-          <p>Classification: {result}</p>
-        </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

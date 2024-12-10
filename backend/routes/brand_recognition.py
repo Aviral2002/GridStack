@@ -2,13 +2,25 @@ from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
 import requests
 import logging
-import json
+import os
 from concurrent.futures import ThreadPoolExecutor
+from dotenv import load_dotenv
+
+
+# Load the .env file explicitly
+load_dotenv(dotenv_path="../.env")
 
 bp = Blueprint("brand_recognition", __name__)
 
-ROBOFLOW_API_URL = 'https://detect.roboflow.com/brand-recignization-and-counting/2'
-ROBOFLOW_API_KEY = 'hEmDOq25p2OMqt1yHbTW'
+ROBOFLOW_API_URL = os.getenv("VITE_ROBOFLOW_MODEL_ENDPOINT")
+ROBOFLOW_API_KEY = os.getenv("VITE_ROBOFLOW_API_KEY")
+
+print("ROBOFLOW_API_KEY:", ROBOFLOW_API_KEY)
+print("ROBOFLOW_API_URL:", ROBOFLOW_API_URL)
+
+
+if not ROBOFLOW_API_URL or not ROBOFLOW_API_KEY:
+    raise ValueError("ROBOFLOW_API_URL and ROBOFLOW_API_KEY must be set in the environment")
 
 logging.basicConfig(level=logging.INFO)
 
@@ -48,4 +60,3 @@ def recognize_brand():
     
     logging.info(f"Recognized brand: {brand}")
     return jsonify({"brand": brand})
-
