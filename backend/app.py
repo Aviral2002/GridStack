@@ -1,11 +1,17 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask
 from flask_cors import CORS
-from routes import freshness_bp, expiry_bp, brand_bp, data_display_bp
 from database import init_db
+from routes import freshness_bp, expiry_bp, brand_bp, data_display_bp
+import logging
 
 app = Flask(__name__)
-CORS(app)
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Apply CORS with support for credentials
+CORS(app, resources={r"/api/*": {"origins": os.environ.get('ALLOWED_ORIGINS', 'http://localhost:3000').split(',')}})
 
 # Initialize the database
 init_db()
@@ -17,6 +23,5 @@ app.register_blueprint(brand_bp, url_prefix='/api/brand')
 app.register_blueprint(data_display_bp, url_prefix='/api/data')
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
 
