@@ -11,7 +11,7 @@ bp = Blueprint("freshness", __name__)
 
 # Load the model
 try:
-    model = load_model("models/GridStack6.keras")
+    model = load_model("models/GridStack6.h5")
     logging.info("Model loaded successfully.")
 except Exception as e:
     logging.error(f"Error loading the model: {e}")
