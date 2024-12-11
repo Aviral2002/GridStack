@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
-import tensorflow as tf
 from tensorflow.keras.models import load_model
 import numpy as np
 from PIL import Image
@@ -10,27 +9,32 @@ from database import add_fresh_produce
 
 bp = Blueprint("freshness", __name__)
 
-# Load the CNN model
-import tensorflow as tf
-
-def load_model_with_custom_objects():
-    custom_objects = {
-        'InputLayer': lambda config: tf.keras.layers.InputLayer(**{k: v for k, v in config.items() if k != 'batch_shape'})
-    }
-    return tf.keras.models.load_model("models/GridStack4.0.keras", custom_objects=custom_objects)
-
-model = load_model_with_custom_objects()
+# Load the model
+try:
+    model = load_model("models/GridStack6.keras")
+    logging.info("Model loaded successfully.")
+except Exception as e:
+    logging.error(f"Error loading the model: {e}")
+    raise
 
 @bp.route("/freshness-check", methods=['POST'])
 @cross_origin()
 def classify_freshness():
     logging.debug("Received freshness check request")
     
-    if 'image' not in request.files:
-        logging.error("No image file in request")
-        return jsonify({"error": "No image file provided"}), 400
+    image_data = None
+    if 'image' in request.files:
+        logging.debug("Received image in form-data")
+        file = request.files['image']
+        image_data = file.read()
+    elif request.data:
+        logging.debug("Received raw image data")
+        image_data = request.data
 
-    file = request.files['image']
+    if image_data is None:
+        logging.error("No image data in the request")
+        return jsonify({"error": "No image provided"}), 400
+    
     produce = request.form.get('produce', 'Unknown')
     
     try:
@@ -44,9 +48,8 @@ def classify_freshness():
      
         add_fresh_produce(produce, result)
 
-        return jsonify({"result": result,})
+        return jsonify({"result": result})
 
     except Exception as e:
         logging.error(f"Error in freshness check: {str(e)}")
         return jsonify({"error": str(e)}), 500
-

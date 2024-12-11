@@ -24,6 +24,9 @@ def preprocess_image(image_bytes):
         np_arr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(np_arr, cv2.IMREAD_GRAYSCALE)
         
+        # Resize image to reduce processing time
+        img = cv2.resize(img, (800, 600))
+        
         # Apply simple thresholding
         _, thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         
@@ -118,7 +121,7 @@ def parse_date(date_string):
     # Try various numeric formats
     formats = [
         "%d/%m/%y", "%d/%m/%Y",  # DD/MM/YY, DD/MM/YYYY
-        "%d-%m-%y", "%d-%m-%Y",  # DD-MM-YY, DD-MM-YYYY
+        "%d-%m-%y", "%d-%m/%Y",  # DD-MM-YY, DD-MM/YYYY
         "%d.%m.%y", "%d.%m.%Y"   # DD.MM.YY, DD.MM.YYYY
     ]
     
@@ -136,6 +139,7 @@ def detect_expiry_date():
     logging.info("Received OCR scan request")
     
     if 'image' not in request.files:
+        logging.error("No image file provided")
         return jsonify({"error": "No image file provided"}), 400
 
     image_file = request.files['image']
@@ -149,7 +153,10 @@ def detect_expiry_date():
         
         # Extract text using OCR with custom configuration and timeout
         try:
-            text = pytesseract.image_to_string(preprocessed_img, config=custom_config, timeout=1)
+            start_time = time.time()
+            text = pytesseract.image_to_string(preprocessed_img, config=custom_config, timeout=10)  # Increased timeout to 10 seconds
+            end_time = time.time()
+            logging.debug(f"OCR took {end_time - start_time:.2f} seconds")
         except RuntimeError as timeout_error:
             logging.error(f"OCR Timeout: {str(timeout_error)}")
             return jsonify({"error": "OCR process timed out"}), 500
@@ -187,4 +194,3 @@ def detect_expiry_date():
             "success": False,
             "error": str(e)
         }), 500
-

@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+const API_URL = import.meta.env.VITE_API_URL;
 
-const socket = io("http://127.0.0.1:5000");
+const socket = io(API_URL, { transports: ["websocket"] });
 export default socket;
