@@ -13,3 +13,4 @@ python-dotenv==1.0.0
 requests==2.31.0
 tensorflow==2.13.0
 tensorboard==2.13.0
+gunicorn==23.0.0
