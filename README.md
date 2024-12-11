@@ -1,4 +1,4 @@
-```markdown
+
 # GridStack
 
 GridStack is a full-stack application designed to streamline inventory management by automating product information extraction and analysis. It leverages image recognition and OCR technology to determine product freshness, extract expiry dates, and identify brands.  This information is then stored in a database for easy access and analysis.
