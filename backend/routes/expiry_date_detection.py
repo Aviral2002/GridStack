@@ -7,6 +7,7 @@ import re
 from datetime import datetime
 import logging
 import traceback
+import time  # Import the time module
 from database import add_packaged_product
 
 bp = Blueprint("expiry_date_detection", __name__)
@@ -25,7 +26,7 @@ def preprocess_image(image_bytes):
         img = cv2.imdecode(np_arr, cv2.IMREAD_GRAYSCALE)
         
         # Resize image to reduce processing time
-        img = cv2.resize(img, (800, 600))
+        img = cv2.resize(img, (400, 300))  # Further reduced image size
         
         # Apply simple thresholding
         _, thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
