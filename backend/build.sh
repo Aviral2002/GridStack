@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Update package list
-sudo apt-get update
+apt-get update
 
 # Install Tesseract and its dependencies
-sudo apt-get install -y \
+apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-eng \
     libleptonica-dev
