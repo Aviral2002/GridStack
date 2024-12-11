@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 import numpy as np
 from PIL import Image
@@ -10,33 +11,33 @@ from database import add_fresh_produce
 bp = Blueprint("freshness", __name__)
 
 # Load the CNN model
-model = load_model("models/GridStack4.0.h5")
+import tensorflow as tf
+def load_model_with_custom_objects():
+    def input_layer_deserializer(config):
+        # Remove 'batch_shape' from config as it's not a valid argument
+        config_copy = config.copy()
+        config_copy.pop('batch_shape', None)
+        return tf.keras.layers.InputLayer(**config_copy)
+
+    custom_objects = {
+        'InputLayer': input_layer_deserializer
+    }
+    return tf.keras.models.load_model("models/GridStack4.0.keras", custom_objects=custom_objects)
 
 @bp.route("/freshness-check", methods=['POST'])
 @cross_origin()
 def classify_freshness():
     logging.debug("Received freshness check request")
     
-# Check if the request has form-data
-        
-    if 'image' in request.files:
-            logging.debug("Received image in form-data")
-            file = request.files['image']
-            image_data = file.read()
-        # Check if the request has raw image data
-    elif request.data:
-            logging.debug("Received raw image data")
-            image_data = request.data
+    if 'image' not in request.files:
+        logging.error("No image file in request")
+        return jsonify({"error": "No image file provided"}), 400
 
-    if image_data is None:
-            logging.error("No image data in the request")
-            return jsonify({"error": "No image provided"}), 400
-    
     file = request.files['image']
     produce = request.form.get('produce', 'Unknown')
     
     try:
-        img = Image.open(io.BytesIO(image_data)).resize((254, 254))
+        img = Image.open(io.BytesIO(image_data)).resize((256, 256))
         img = np.array(img) / 255.0
         img = np.expand_dims(img, axis=0)
 
