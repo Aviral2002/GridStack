@@ -14,9 +14,9 @@ bp = Blueprint("expiry_date_detection", __name__)
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Configure Tesseract path and parameters
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-custom_config = r'--oem 1 --psm 3'
+# Tesseract path is not needed when installed system-wide
+# pytesseract will find it automatically
+custom_config = r'--oem 1 --psm 6 -c tessedit_char_whitelist="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/.-: "'
 
 def preprocess_image(image_bytes):
     try:
