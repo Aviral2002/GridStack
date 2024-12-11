@@ -12,7 +12,7 @@ const DataDisplay = () => {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch('http://192.168.29.157:5000/api/data/get-all-data');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/data/get-all-data`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
