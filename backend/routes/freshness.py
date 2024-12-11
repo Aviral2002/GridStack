@@ -10,17 +10,20 @@ from database import add_fresh_produce
 
 bp = Blueprint("freshness", __name__)
 
-# Load the CNN model
+
 def load_model_with_custom_objects():
     def input_layer_deserializer(config):
-        # Remove 'batch_shape' from config as it's not a valid argument
+        # Remove 'batch_shape' from config to avoid the TypeError
         config_copy = config.copy()
-        config_copy.pop('batch_shape', None)
+        if 'batch_shape' in config_copy:
+            del config_copy['batch_shape']  # Remove the batch_shape field
         return tf.keras.layers.InputLayer(**config_copy)
 
     custom_objects = {
         'InputLayer': input_layer_deserializer
     }
+    
+    # Load the model with the custom deserializer for InputLayer
     return tf.keras.models.load_model("models/GridStack4.0.keras", custom_objects=custom_objects)
 
 # Load model once when the application starts
