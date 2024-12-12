@@ -4,7 +4,7 @@ from flask_cors import CORS
 from database import init_db
 from routes import freshness_bp, expiry_bp, brand_bp, data_display_bp
 import logging
-
+import awsgi
 app = Flask(__name__)
 
 # Configure logging
@@ -25,3 +25,5 @@ app.register_blueprint(data_display_bp, url_prefix='/api/data')
 if __name__ == '__main__':
     app.run(debug=True)
 
+def lambda_handler(event, context):
+    return awsgi.response(app, event, context, base64_content_types={"image/png"})
