@@ -10,18 +10,25 @@ from database import add_fresh_produce
 bp = Blueprint("freshness", __name__)
 
 # Load the model
-try:
-    model = load_model("models/GridStack6.h5")
-    logging.info("Model loaded successfully.")
-except Exception as e:
-    logging.error(f"Error loading the model: {e}")
-    raise
+model = None
+
+def load_model_lazy():
+    global model
+    if model is None:
+        try:
+            model = load_model("models/GridStack6.h5")
+            logging.info("Model loaded successfully.")
+        except Exception as e:
+            logging.error(f"Error loading the model: {e}")
+            raise
 
 @bp.route("/freshness-check", methods=['POST'])
 @cross_origin()
 def classify_freshness():
     logging.debug("Received freshness check request")
     
+    load_model_lazy()  # Ensure model is loaded
+
     image_data = None
     if 'image' in request.files:
         logging.debug("Received image in form-data")
@@ -53,3 +60,4 @@ def classify_freshness():
     except Exception as e:
         logging.error(f"Error in freshness check: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
