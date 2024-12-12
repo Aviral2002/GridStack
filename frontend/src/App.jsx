@@ -12,15 +12,28 @@ function App() {
       <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 font-sans flex flex-col">
         <Navbar />
         <main className="container mx-auto px-4 py-8 flex-grow">
-          {/* <h1 className="text-4xl font-bold text-primary mb-8 text-center">GridStack</h1> */}
           <Routes>
-            <Route path="/" element={
-              <div className="mt-15 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <FreshnessChecker />
-                <OCRScanner />
-                <BrandRecognition />
-              </div>
-            } />
+            <Route
+              path="/"
+              element={
+                <div>
+                  <div className="video-container mb-8">
+                    <video
+                      className="w-full h-auto rounded-lg shadow-lg"
+                      controls
+                    >
+                      <source src="public/beg.mp4" type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                  <div className="mt-15 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <FreshnessChecker />
+                    <OCRScanner />
+                    <BrandRecognition />
+                  </div>
+                </div>
+              }
+            />
             <Route path="/freshness" element={<FreshnessChecker />} />
             <Route path="/ocr" element={<OCRScanner />} />
             <Route path="/brand" element={<BrandRecognition />} />
@@ -28,7 +41,15 @@ function App() {
           </Routes>
         </main>
         <footer className="bg-gray-800 text-white text-center py-4">
-          Developed by <a href="https://github.com/Aviral2002" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Aviral2002</a>
+          Developed by{' '}
+          <a
+            href="https://github.com/Aviral2002"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:underline"
+          >
+            Aviral2002
+          </a>
         </footer>
       </div>
     </Router>
