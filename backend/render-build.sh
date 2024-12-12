@@ -1,7 +1,11 @@
 #!/bin/bash
 
+# Add APT sources for Tesseract
+echo "deb http://deb.debian.org/debian buster main contrib non-free" >> /etc/apt/sources.list
+
 # Update package list
 apt-get update
+
 
 # Install Tesseract and its dependencies
 apt-get install -y tesseract-ocr tesseract-ocr-eng libleptonica-dev
