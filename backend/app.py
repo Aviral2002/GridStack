@@ -4,11 +4,11 @@ from flask_cors import CORS
 from database import init_db
 from routes import freshness_bp, expiry_bp, brand_bp, data_display_bp
 import logging
-import awsgi
+
 app = Flask(__name__)
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 # Apply CORS with support for credentials
 CORS(app, resources={r"/api/*": {"origins": os.environ.get('ALLOWED_ORIGINS', 'http://localhost:3000').split(',')}})
@@ -23,7 +23,4 @@ app.register_blueprint(brand_bp, url_prefix='/api/brand')
 app.register_blueprint(data_display_bp, url_prefix='/api/data')
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
-def lambda_handler(event, context):
-    return awsgi.response(app, event, context, base64_content_types={"image/png"})
+    app.run(debug=False)
