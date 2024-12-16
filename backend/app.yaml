@@ -1,0 +1,17 @@
+runtime: custom
+env: flex
+
+env_variables:
+  ALLOWED_ORIGINS: "https://gridstack-1.onrender.com/"
+  VITE_ROBOFLOW_API_KEY: "hEmDOq25p2OMqt1yHbTW"
+  VITE_ROBOFLOW_MODEL_ENDPOINT: "https://detect.roboflow.com/brand-recignization-and-counting/2"
+  DATABASE_URL: "sqlite:///./gridstack.db"
+
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 5
+
+resources:
+  cpu: 2
+  memory_gb: 4
+  disk_size_gb: 20

@@ -23,4 +23,4 @@ app.register_blueprint(brand_bp, url_prefix='/api/brand')
 app.register_blueprint(data_display_bp, url_prefix='/api/data')
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
