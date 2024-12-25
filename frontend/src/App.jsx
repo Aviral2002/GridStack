@@ -22,7 +22,7 @@ function App() {
                       className="w-full h-auto rounded-lg shadow-lg"
                       controls
                     >
-                      <source src="/beg.mp4" type="video/mp4" />
+                      <source src="/Flipkart_Grid_Video_Demo (1).mp4" type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>
                   </div>
