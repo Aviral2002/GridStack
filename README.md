@@ -1,6 +1,8 @@
 **⚠️🚫 Backend Offline Notice:**  
 **Unfortunately, the backend hosting has been terminated due to the end of my Google App Engine free plan.**  
-**The frontend is still accessible here:** [https://gridstack-1.onrender.com](https://gridstack-1.onrender.com) 🌐
+**But don’t worry! The frontend is still live here:** [https://gridstack-1.onrender.com](https://gridstack-1.onrender.com) 🌐  
+🎥 **You can also watch a short demo video on the website showing how the project worked during its prototyping stage!**
+
 
 
 # GridStack
